@@ -1,0 +1,49 @@
+@use "bootstrap/scss/bootstrap";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+:root {
+  --brand-primary: #6366f1;
+}
+
+body {
+  background-color: var(--bs-body-bg);
+  font-family: 'Segoe UI', Roboto, -apple-system, sans-serif;
+}
+
+.btn-primary {
+  --bs-btn-bg: #6366f1;
+  --bs-btn-border-color: #6366f1;
+  --bs-btn-hover-bg: #4f46e5;
+  --bs-btn-hover-border-color: #4f46e5;
+  --bs-btn-active-bg: #4338ca;
+}
+
+.text-primary { color: #6366f1 !important; }
+.bg-primary { background-color: #6366f1 !important; }
+
+.auth-wrapper {
+  min-height: calc(100vh - 56px);
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(99,102,241,0.02));
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 430px;
+  border-radius: 16px;
+}
+
+.card {
+  border-radius: 14px;
+}
+
+.upload-dropzone {
+  border-style: dashed !important;
+  transition: border-color 0.2s ease;
+  cursor: pointer;
+}
+
+[data-bs-theme="dark"] {
+  .card { background-color: #1e1f26; }
+  .app-sidebar { background-color: #17181d; }
+}

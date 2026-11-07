@@ -1,0 +1,154 @@
+<div>
+  @if (loading()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else if (interview(); as itv) {
+
+    @if (itv.status === 'completed') {
+      <!-- ===== COMPLETED REPORT VIEW ===== -->
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+        <div>
+          <h3 class="fw-bold mb-0">{{ itv.interviewType }} Interview Report</h3>
+          <p class="text-muted mb-0">{{ itv.jobRole || 'General role' }} · Completed {{ itv.completedAt | date: 'medium' }}</p>
+        </div>
+        <button class="btn btn-primary" (click)="downloadReport()"><i class="bi bi-file-earmark-pdf me-1"></i>Download PDF Report</button>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm"><div class="card-body text-center"><app-score-gauge [value]="itv.overallScore || 0" label="Overall" /></div></div></div>
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm"><div class="card-body text-center"><app-score-gauge [value]="itv.confidenceScore || 0" label="Confidence" /></div></div></div>
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm"><div class="card-body text-center"><app-score-gauge [value]="itv.communicationScore || 0" label="Communication" /></div></div></div>
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm"><div class="card-body text-center"><app-score-gauge [value]="itv.technicalAccuracyScore || 0" label="Technical" /></div></div></div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h6 class="text-muted mb-2"><i class="bi bi-check-circle text-success me-1"></i>Strengths</h6>
+            <ul class="small ps-3">@for (s of itv.strengths; track s) { <li>{{ s }}</li> }</ul>
+          </div></div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h6 class="text-muted mb-2"><i class="bi bi-x-circle text-danger me-1"></i>Weaknesses</h6>
+            <ul class="small ps-3">@for (s of itv.weaknesses; track s) { <li>{{ s }}</li> }</ul>
+          </div></div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h6 class="text-muted mb-2"><i class="bi bi-lightbulb text-warning me-1"></i>Recommended Learning</h6>
+            <ul class="small ps-3">@for (s of itv.recommendedLearningAreas; track s) { <li>{{ s }}</li> }</ul>
+          </div></div>
+        </div>
+      </div>
+
+      <h6 class="text-muted mb-2">Questions &amp; Answers</h6>
+      @for (q of questions(); track q._id; let idx = $index) {
+        <div class="card border-0 shadow-sm mb-2">
+          <div class="card-body">
+            <p class="fw-semibold mb-1">Q{{ idx + 1 }}. {{ q.questionText }}</p>
+            @if (answers()[idx]; as a) {
+              <p class="small text-muted mb-2">Your answer: {{ a.answerText || '(no answer)' }}</p>
+              <div class="d-flex gap-3 small mb-1">
+                <span>Score: <strong>{{ a.evaluation?.score }}</strong></span>
+                <span>Confidence: <strong>{{ a.evaluation?.confidenceScore }}</strong></span>
+                <span>Communication: <strong>{{ a.evaluation?.communicationScore }}</strong></span>
+                <span>Technical: <strong>{{ a.evaluation?.technicalAccuracyScore }}</strong></span>
+              </div>
+              <p class="small mb-0"><em>{{ a.evaluation?.feedback }}</em></p>
+            }
+          </div>
+        </div>
+      }
+
+    } @else {
+      <!-- ===== ACTIVE SESSION VIEW ===== -->
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+          <h5 class="fw-bold mb-0">{{ itv.interviewType }} Interview @if (itv.jobRole) { — {{ itv.jobRole }} }</h5>
+          <p class="text-muted small mb-0">Question {{ currentIndex() + 1 }} of {{ questions().length }} · {{ mode === 'voice' ? 'Voice mode' : 'Text mode' }}</p>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <span class="badge text-bg-dark fs-6"><i class="bi bi-stopwatch me-1"></i>{{ formattedTime(elapsedSeconds()) }}</span>
+        </div>
+      </div>
+
+      <div class="progress mb-4" style="height: 8px;">
+        <div class="progress-bar" [style.width.%]="(answeredCount / questions().length) * 100"></div>
+      </div>
+
+      @if (currentQuestion; as q) {
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-body">
+            <span class="badge text-bg-light border mb-2">{{ q.category }} · {{ q.difficulty }}</span>
+            <h5 class="mb-3">{{ q.questionText }}</h5>
+
+            @if (mode === 'voice') {
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <button class="btn btn-sm btn-outline-secondary" (click)="speakCurrentQuestion()" [disabled]="isSpeaking()">
+                  <i class="bi bi-volume-up me-1"></i>{{ isSpeaking() ? 'Speaking…' : 'Replay Question' }}
+                </button>
+                @if (!isListening()) {
+                  <button class="btn btn-sm btn-primary" (click)="startListening()">
+                    <i class="bi bi-mic-fill me-1"></i>Start Speaking
+                  </button>
+                } @else {
+                  <button class="btn btn-sm btn-danger" (click)="stopListening()">
+                    <i class="bi bi-mic-mute-fill me-1"></i>Stop
+                  </button>
+                  <span class="text-danger small"><span class="spinner-grow spinner-grow-sm me-1"></span>Listening…</span>
+                }
+              </div>
+            }
+
+            <textarea class="form-control" rows="5" [(ngModel)]="answerText" placeholder="Type (or speak) your answer here…" [disabled]="isAnswered"></textarea>
+
+            <div class="d-flex justify-content-between mt-3">
+              <div>
+                <button class="btn btn-outline-secondary me-2" (click)="prevQuestion()" [disabled]="currentIndex() === 0">
+                  <i class="bi bi-arrow-left"></i> Previous
+                </button>
+                <button class="btn btn-outline-secondary" (click)="nextQuestion()" [disabled]="currentIndex() === questions().length - 1">
+                  Next <i class="bi bi-arrow-right"></i>
+                </button>
+              </div>
+              @if (!isAnswered) {
+                <button class="btn btn-primary" (click)="submitAnswer()" [disabled]="submitting()">
+                  @if (submitting()) { <span class="spinner-border spinner-border-sm me-2"></span> Evaluating… } @else { Submit Answer }
+                </button>
+              } @else {
+                <span class="badge text-bg-success align-self-center"><i class="bi bi-check-lg me-1"></i>Answered</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        @if (lastEvaluation(); as ev) {
+          <div class="card border-0 shadow-sm mb-3 border-start border-4 border-primary">
+            <div class="card-body">
+              <h6 class="text-muted mb-2">AI Evaluation</h6>
+              <div class="d-flex gap-3 small mb-2 flex-wrap">
+                <span class="badge text-bg-primary">Score: {{ ev.evaluation.score }}</span>
+                <span class="badge text-bg-light border">Confidence: {{ ev.evaluation.confidenceScore }}</span>
+                <span class="badge text-bg-light border">Communication: {{ ev.evaluation.communicationScore }}</span>
+                <span class="badge text-bg-light border">Technical: {{ ev.evaluation.technicalAccuracyScore }}</span>
+              </div>
+              <p class="small mb-2">{{ ev.evaluation.feedback }}</p>
+              @if (ev.evaluation.idealAnswerPointers?.length) {
+                <p class="small fw-semibold mb-1">A strong answer would include:</p>
+                <ul class="small ps-3 mb-0">@for (p of ev.evaluation.idealAnswerPointers; track p) { <li>{{ p }}</li> }</ul>
+              }
+            </div>
+          </div>
+        }
+      }
+
+      @if (allAnswered) {
+        <div class="text-center mt-4">
+          <button class="btn btn-success btn-lg px-5" (click)="finishInterview()" [disabled]="completing()">
+            @if (completing()) { <span class="spinner-border spinner-border-sm me-2"></span> Finalizing… } @else { <i class="bi bi-flag-fill me-2"></i>Finish Interview & Get Report }
+          </button>
+        </div>
+      }
+    }
+  }
+</div>

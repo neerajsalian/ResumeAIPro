@@ -1,0 +1,59 @@
+<div class="mx-auto" style="max-width: 700px;">
+  <h3 class="fw-bold mb-3">Start a Mock Interview</h3>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      @if (!resumes().length) {
+        <div class="alert alert-warning small">You need to upload a resume before starting an interview. <a routerLink="/resume">Upload one now</a>.</div>
+      }
+
+      <div class="mb-3">
+        <label class="form-label small">Resume</label>
+        <select class="form-select" [(ngModel)]="selectedResumeId">
+          @for (r of resumes(); track r._id) {
+            <option [value]="r._id">{{ r.originalFileName }} (v{{ r.version }})</option>
+          }
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label small">Interview Type</label>
+        <div class="btn-group w-100" role="group">
+          @for (t of types; track t) {
+            <input type="radio" class="btn-check" [id]="'type-' + t" [value]="t" [(ngModel)]="interviewType" name="interviewType" />
+            <label class="btn btn-outline-primary" [for]="'type-' + t">{{ t }}</label>
+          }
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label small">Target Job Role</label>
+        <input type="text" class="form-control" [(ngModel)]="jobRole" placeholder="e.g. Full Stack Developer" />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label small">Number of Questions</label>
+        <input type="range" class="form-range" min="3" max="12" [(ngModel)]="questionCount" />
+        <div class="small text-muted text-center">{{ questionCount }} questions</div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label small d-block">Interview Mode</label>
+        <div class="btn-group w-100" role="group">
+          <input type="radio" class="btn-check" id="mode-text" value="text" [(ngModel)]="mode" name="mode" />
+          <label class="btn btn-outline-secondary" for="mode-text"><i class="bi bi-keyboard me-1"></i>Text</label>
+
+          <input type="radio" class="btn-check" id="mode-voice" value="voice" [(ngModel)]="mode" name="mode" [disabled]="!voiceSupported" />
+          <label class="btn btn-outline-secondary" for="mode-voice"><i class="bi bi-mic-fill me-1"></i>Voice</label>
+        </div>
+        @if (!voiceSupported) {
+          <p class="small text-muted mt-1 mb-0">Voice mode uses your browser's built-in speech recognition, which isn't supported in this browser. Try Chrome or Edge.</p>
+        }
+      </div>
+
+      <button class="btn btn-primary w-100" (click)="start()" [disabled]="creating() || !resumes().length">
+        @if (creating()) { <span class="spinner-border spinner-border-sm me-2"></span> Generating questions… } @else { Start Interview }
+      </button>
+    </div>
+  </div>
+</div>

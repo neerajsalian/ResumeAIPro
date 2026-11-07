@@ -1,0 +1,111 @@
+<div>
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h3 class="fw-bold mb-0">Welcome back, {{ auth.currentUser()?.name }} 👋</h3>
+      <p class="text-muted mb-0">Here's an overview of your resume and interview progress.</p>
+    </div>
+    <a routerLink="/resume" class="btn btn-primary"><i class="bi bi-upload me-1"></i> Upload Resume</a>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-muted small">Resumes Uploaded</div>
+          <div class="fs-3 fw-bold">{{ resumes().length }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-muted small">Latest ATS Score</div>
+          <div class="fs-3 fw-bold">{{ latestAnalysis()?.atsScore ?? '—' }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-muted small">Interviews Completed</div>
+          <div class="fs-3 fw-bold">{{ completedInterviews.length }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-muted small">Avg. Interview Score</div>
+          <div class="fs-3 fw-bold">{{ avgInterviewScore }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <h6 class="text-muted mb-3">Resume Strength</h6>
+          @if (latestAnalysis(); as a) {
+            <app-score-gauge [value]="a.resumeStrengthScore" label="Strength Score" />
+          } @else {
+            <p class="text-muted small mb-0">Upload and analyze a resume to see your score.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="text-muted mb-3">Recent Resumes</h6>
+          @if (resumes().length) {
+            <ul class="list-group list-group-flush">
+              @for (r of resumes().slice(0, 5); track r._id) {
+                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                  <div>
+                    <div class="fw-semibold">{{ r.originalFileName }}</div>
+                    <div class="small text-muted">v{{ r.version }} · {{ r.status }}</div>
+                  </div>
+                  <a [routerLink]="['/resume', r._id]" class="btn btn-sm btn-outline-primary">View</a>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="text-muted small mb-0">No resumes uploaded yet.</p>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm mt-3">
+    <div class="card-body">
+      <h6 class="text-muted mb-3">Recent Interviews</h6>
+      @if (interviews().length) {
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead>
+              <tr class="text-muted small"><th>Type</th><th>Job Role</th><th>Mode</th><th>Status</th><th>Score</th><th></th></tr>
+            </thead>
+            <tbody>
+              @for (i of interviews().slice(0, 5); track i._id) {
+                <tr>
+                  <td>{{ i.interviewType }}</td>
+                  <td>{{ i.jobRole || '—' }}</td>
+                  <td><span class="badge text-bg-light border">{{ i.mode }}</span></td>
+                  <td><span class="badge" [class.text-bg-success]="i.status === 'completed'" [class.text-bg-warning]="i.status === 'in-progress'" [class.text-bg-secondary]="i.status !== 'completed' && i.status !== 'in-progress'">{{ i.status }}</span></td>
+                  <td>{{ i.overallScore ?? '—' }}</td>
+                  <td><a [routerLink]="['/interview', i._id]" class="btn btn-sm btn-outline-primary">Open</a></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="text-muted small mb-0">No interviews yet. <a routerLink="/interview">Start your first mock interview</a>.</p>
+      }
+    </div>
+  </div>
+</div>

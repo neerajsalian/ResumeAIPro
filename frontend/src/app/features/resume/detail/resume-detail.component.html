@@ -1,0 +1,162 @@
+<div>
+  <a routerLink="/resume" class="text-decoration-none small mb-2 d-inline-block"><i class="bi bi-arrow-left me-1"></i>Back to resumes</a>
+
+  @if (loading()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else if (resume(); as r) {
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+      <div>
+        <h3 class="fw-bold mb-0">{{ r.originalFileName }}</h3>
+        <p class="text-muted mb-0">Version {{ r.version }} · Uploaded {{ r.createdAt | date: 'medium' }}</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a [routerLink]="['/job-match']" [queryParams]="{ resumeId: r._id }" class="btn btn-outline-primary"><i class="bi bi-bullseye me-1"></i>Match to Job</a>
+        <a [routerLink]="['/career']" [queryParams]="{ resumeId: r._id }" class="btn btn-outline-secondary"><i class="bi bi-signpost-2 me-1"></i>Career Guidance</a>
+      </div>
+    </div>
+
+    @if (!analysis()) {
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+          <i class="bi bi-stars display-4 text-primary"></i>
+          <h5 class="mt-3">Run AI Analysis</h5>
+          <p class="text-muted">Get your ATS score, resume strength score, skill breakdown, and improvement suggestions.</p>
+          <div class="row justify-content-center">
+            <div class="col-md-5">
+              <input type="text" class="form-control mb-3" placeholder="Target job role (optional)" [(ngModel)]="targetJobRole" name="targetJobRole" />
+            </div>
+          </div>
+          <button class="btn btn-primary px-4" (click)="runAnalysis()" [disabled]="analyzing()">
+            @if (analyzing()) { <span class="spinner-border spinner-border-sm me-2"></span> Analyzing… } @else { Run Analysis }
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="d-flex justify-content-end mb-2">
+        <button class="btn btn-sm btn-outline-secondary me-2" (click)="runAnalysis()" [disabled]="analyzing()">
+          <i class="bi bi-arrow-repeat me-1"></i>Re-analyze
+        </button>
+        <button class="btn btn-sm btn-primary" (click)="downloadReport()"><i class="bi bi-file-earmark-pdf me-1"></i>Download PDF Report</button>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+              <app-score-gauge [value]="analysis()!.atsScore" label="ATS Score" />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+              <app-score-gauge [value]="analysis()!.resumeStrengthScore" label="Resume Strength" />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="text-muted mb-2">Summary</h6>
+              <p class="mb-0 small">{{ analysis()!.summary }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h6 class="text-muted mb-3">Skill Analysis</h6>
+          <canvas #skillsChart height="90"></canvas>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="text-muted mb-2"><i class="bi bi-exclamation-triangle text-warning me-1"></i>Missing Skills</h6>
+              @if (analysis()!.missingSkills?.length) {
+                <div class="d-flex flex-wrap gap-1">
+                  @for (s of analysis()!.missingSkills; track s) { <span class="badge text-bg-warning-subtle text-warning-emphasis border">{{ s }}</span> }
+                </div>
+              } @else { <p class="small text-muted mb-0">None detected.</p> }
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="text-muted mb-2"><i class="bi bi-key text-info me-1"></i>Missing Keywords</h6>
+              @if (analysis()!.missingKeywords?.length) {
+                <div class="d-flex flex-wrap gap-1">
+                  @for (k of analysis()!.missingKeywords; track k) { <span class="badge text-bg-info-subtle text-info-emphasis border">{{ k }}</span> }
+                </div>
+              } @else { <p class="small text-muted mb-0">None detected.</p> }
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="text-muted mb-2"><i class="bi bi-check-circle text-success me-1"></i>Strengths</h6>
+              <ul class="small mb-0 ps-3">@for (s of analysis()!.strengths; track s) { <li>{{ s }}</li> }</ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="text-muted mb-2"><i class="bi bi-x-circle text-danger me-1"></i>Weaknesses</h6>
+              <ul class="small mb-0 ps-3">@for (s of analysis()!.weaknesses; track s) { <li>{{ s }}</li> }</ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="text-muted mb-2">Grammar Suggestions</h6>
+              <ul class="small mb-0 ps-3">@for (s of analysis()!.grammarSuggestions; track s) { <li>{{ s }}</li> }</ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="text-muted mb-2">Formatting Suggestions</h6>
+              <ul class="small mb-0 ps-3">@for (s of analysis()!.formattingSuggestions; track s) { <li>{{ s }}</li> }</ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="text-muted mb-2">Improvement Recommendations</h6>
+              <ul class="small mb-0 ps-3">@for (s of analysis()!.improvementRecommendations; track s) { <li>{{ s }}</li> }</ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (atsChecks(); as checks) {
+      <div class="card border-0 shadow-sm mt-3">
+        <div class="card-body">
+          <h6 class="text-muted mb-3">Deterministic ATS Parsing Checks</h6>
+          <div class="row">
+            <div class="col-md-6">
+              <p class="small fw-semibold text-success mb-2">Passed</p>
+              <ul class="small ps-3">@for (p of checks.passed; track p) { <li>{{ p }}</li> }</ul>
+            </div>
+            <div class="col-md-6">
+              <p class="small fw-semibold text-danger mb-2">Issues</p>
+              <ul class="small ps-3">@for (i of checks.issues; track i) { <li>{{ i }}</li> }</ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

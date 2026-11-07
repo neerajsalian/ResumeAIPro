@@ -1,0 +1,44 @@
+<div>
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h3 class="fw-bold mb-0">User Management</h3>
+    <div class="input-group" style="max-width: 300px;">
+      <input type="text" class="form-control" placeholder="Search name or email…" [(ngModel)]="search" (keyup.enter)="page.set(1); load()" />
+      <button class="btn btn-outline-secondary" (click)="page.set(1); load()"><i class="bi bi-search"></i></button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead><tr class="text-muted small"><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th class="text-end">Actions</th></tr></thead>
+        <tbody>
+          @for (u of users(); track u._id) {
+            <tr>
+              <td>{{ u.name }}</td>
+              <td>{{ u.email }}</td>
+              <td><span class="badge" [class.text-bg-primary]="u.role === 'admin'" [class.text-bg-light]="u.role !== 'admin'">{{ u.role }}</span></td>
+              <td><span class="badge" [class.text-bg-success]="u.isActive" [class.text-bg-secondary]="!u.isActive">{{ u.isActive ? 'Active' : 'Inactive' }}</span></td>
+              <td class="small text-muted">{{ u.createdAt | date: 'mediumDate' }}</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-secondary me-1" (click)="toggleStatus(u)">{{ u.isActive ? 'Deactivate' : 'Activate' }}</button>
+                <button class="btn btn-sm btn-outline-primary me-1" (click)="toggleRole(u)">{{ u.role === 'admin' ? 'Revoke Admin' : 'Make Admin' }}</button>
+                <button class="btn btn-sm btn-outline-danger" (click)="deleteUser(u)"><i class="bi bi-trash"></i></button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="d-flex justify-content-between align-items-center">
+      <span class="small text-muted">{{ total() }} users total</span>
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" [class.disabled]="page() === 1"><button class="page-link" (click)="goToPage(page() - 1)">Prev</button></li>
+        <li class="page-item disabled"><span class="page-link">{{ page() }} / {{ totalPages }}</span></li>
+        <li class="page-item" [class.disabled]="page() === totalPages"><button class="page-link" (click)="goToPage(page() + 1)">Next</button></li>
+      </ul>
+    </nav>
+  }
+</div>

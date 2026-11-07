@@ -1,0 +1,93 @@
+<div>
+  <h3 class="fw-bold mb-3">Job Description Matching</h3>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label small">Resume</label>
+          <select class="form-select" [(ngModel)]="selectedResumeId">
+            @for (r of resumes(); track r._id) {
+              <option [value]="r._id">{{ r.originalFileName }} (v{{ r.version }})</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small">Job Title <span class="text-muted">(optional)</span></label>
+          <input type="text" class="form-control" [(ngModel)]="title" placeholder="e.g. Senior Backend Engineer" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small">Company <span class="text-muted">(optional)</span></label>
+          <input type="text" class="form-control" [(ngModel)]="company" placeholder="e.g. Acme Corp" />
+        </div>
+        <div class="col-12">
+          <label class="form-label small">Job Description</label>
+          <textarea class="form-control" rows="8" [(ngModel)]="jdText" placeholder="Paste the full job description here…"></textarea>
+        </div>
+        <div class="col-12">
+          <button class="btn btn-primary" (click)="runMatch()" [disabled]="matching()">
+            @if (matching()) { <span class="spinner-border spinner-border-sm me-2"></span> Analyzing… } @else { <i class="bi bi-bullseye me-1"></i> Analyze Match }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (result(); as r) {
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Match Result @if (r.title) { — {{ r.title }} }</h5>
+          <span class="badge fs-6" [class.text-bg-success]="r.matchPercentage >= 75" [class.text-bg-warning]="r.matchPercentage >= 50 && r.matchPercentage < 75" [class.text-bg-danger]="r.matchPercentage < 50">
+            {{ r.matchPercentage }}% Match
+          </span>
+        </div>
+        <div class="progress mb-4" style="height: 10px;">
+          <div class="progress-bar" [style.width.%]="r.matchPercentage"></div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <h6 class="text-muted mb-2"><i class="bi bi-check2-circle text-success me-1"></i>Matched Keywords</h6>
+            <div class="d-flex flex-wrap gap-1">
+              @for (k of r.matchedKeywords; track k) { <span class="badge text-bg-success-subtle text-success-emphasis border">{{ k }}</span> }
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-muted mb-2"><i class="bi bi-exclamation-circle text-danger me-1"></i>Missing Keywords</h6>
+            <div class="d-flex flex-wrap gap-1">
+              @for (k of r.missingKeywords; track k) { <span class="badge text-bg-danger-subtle text-danger-emphasis border">{{ k }}</span> }
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-muted mb-2">Suggested Resume Edits</h6>
+            <ul class="small ps-3">@for (s of r.suggestions; track s) { <li>{{ s }}</li> }</ul>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-muted mb-2">ATS Optimization Tips</h6>
+            <ul class="small ps-3">@for (s of r.atsOptimizationTips; track s) { <li>{{ s }}</li> }</ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (matches().length) {
+    <h6 class="text-muted mb-2">Match History</h6>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead><tr class="text-muted small"><th>Title</th><th>Company</th><th>Match %</th><th>Date</th></tr></thead>
+        <tbody>
+          @for (m of matches(); track m._id) {
+            <tr>
+              <td>{{ m.title || '—' }}</td>
+              <td>{{ m.company || '—' }}</td>
+              <td>{{ m.matchPercentage }}%</td>
+              <td class="small text-muted">{{ m.createdAt | date: 'short' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

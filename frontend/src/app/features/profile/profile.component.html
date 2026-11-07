@@ -1,0 +1,61 @@
+<div class="mx-auto" style="max-width: 700px;">
+  <h3 class="fw-bold mb-3">Profile</h3>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h6 class="text-muted mb-3">Personal Information</h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label small">Full Name</label>
+          <input type="text" class="form-control" [(ngModel)]="name" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small">Email</label>
+          <input type="text" class="form-control" [value]="auth.currentUser()?.email" disabled />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small">Phone</label>
+          <input type="text" class="form-control" [(ngModel)]="phone" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small">Target Job Role</label>
+          <input type="text" class="form-control" [(ngModel)]="targetJobRole" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small">Location</label>
+          <input type="text" class="form-control" [(ngModel)]="location" />
+        </div>
+        <div class="col-12">
+          <label class="form-label small">Bio</label>
+          <textarea class="form-control" rows="3" [(ngModel)]="bio"></textarea>
+        </div>
+        <div class="col-12">
+          <button class="btn btn-primary" (click)="saveProfile()" [disabled]="saving()">
+            @if (saving()) { <span class="spinner-border spinner-border-sm me-2"></span> } Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <h6 class="text-muted mb-3">Change Password</h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label small">Current Password</label>
+          <input type="password" class="form-control" [(ngModel)]="currentPassword" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small">New Password</label>
+          <input type="password" class="form-control" [(ngModel)]="newPassword" />
+        </div>
+        <div class="col-12">
+          <button class="btn btn-outline-primary" (click)="changePassword()" [disabled]="changingPassword()">
+            @if (changingPassword()) { <span class="spinner-border spinner-border-sm me-2"></span> } Update Password
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

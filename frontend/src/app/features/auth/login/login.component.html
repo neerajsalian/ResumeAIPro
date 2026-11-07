@@ -1,0 +1,33 @@
+<div class="auth-wrapper d-flex align-items-center justify-content-center">
+  <div class="card auth-card shadow-sm border-0">
+    <div class="card-body p-4 p-md-5">
+      <div class="text-center mb-4">
+        <i class="bi bi-file-earmark-person-fill text-primary display-5"></i>
+        <h3 class="fw-bold mt-2 mb-0">Welcome back</h3>
+        <p class="text-muted small">Log in to continue to ResumeAI Pro</p>
+      </div>
+
+      <form (ngSubmit)="submit()" #f="ngForm">
+        <div class="mb-3">
+          <label class="form-label small">Email address</label>
+          <input type="email" class="form-control" name="email" [(ngModel)]="email" required autocomplete="email" placeholder="you@example.com" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label small">Password</label>
+          <input type="password" class="form-control" name="password" [(ngModel)]="password" required autocomplete="current-password" placeholder="••••••••" />
+        </div>
+        <div class="d-flex justify-content-end mb-3">
+          <a routerLink="/auth/forgot-password" class="small">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn btn-primary w-100" [disabled]="loading()">
+          @if (loading()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          Log In
+        </button>
+      </form>
+
+      <p class="text-center small text-muted mt-4 mb-0">
+        Don't have an account? <a routerLink="/auth/register">Sign up</a>
+      </p>
+    </div>
+  </div>
+</div>

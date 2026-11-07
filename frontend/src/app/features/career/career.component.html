@@ -1,0 +1,56 @@
+<div>
+  <h3 class="fw-bold mb-3">AI Career Guidance</h3>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-5">
+          <label class="form-label small">Resume</label>
+          <select class="form-select" [(ngModel)]="selectedResumeId">
+            @for (r of resumes(); track r._id) { <option [value]="r._id">{{ r.originalFileName }}</option> }
+          </select>
+        </div>
+        <div class="col-md-5">
+          <label class="form-label small">Target Job Role</label>
+          <input type="text" class="form-control" [(ngModel)]="targetJobRole" placeholder="e.g. Data Scientist" />
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-primary w-100" (click)="getGuidance()" [disabled]="loading()">
+            @if (loading()) { <span class="spinner-border spinner-border-sm"></span> } @else { Get Guidance }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (guidance(); as g) {
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <h6 class="text-muted mb-2"><i class="bi bi-signpost-2 text-primary me-1"></i>Recommended Career Paths</h6>
+          <ul class="ps-3">@for (p of g.recommendedCareerPaths; track p) { <li>{{ p }}</li> }</ul>
+        </div></div>
+      </div>
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <h6 class="text-muted mb-2"><i class="bi bi-patch-check text-success me-1"></i>Suggested Certifications</h6>
+          <ul class="ps-3">@for (c of g.suggestedCertifications; track c) { <li>{{ c }}</li> }</ul>
+        </div></div>
+      </div>
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <h6 class="text-muted mb-2"><i class="bi bi-mortarboard text-info me-1"></i>Recommended Courses</h6>
+          <ul class="ps-3">@for (c of g.recommendedCourses; track c) { <li>{{ c }}</li> }</ul>
+        </div></div>
+      </div>
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <h6 class="text-muted mb-2"><i class="bi bi-exclamation-triangle text-warning me-1"></i>Missing Skills for Target Job</h6>
+          <div class="d-flex flex-wrap gap-1">
+            @for (s of g.missingSkillsForTargetJob; track s) { <span class="badge text-bg-warning-subtle text-warning-emphasis border">{{ s }}</span> }
+          </div>
+        </div></div>
+      </div>
+    </div>
+  }
+</div>
